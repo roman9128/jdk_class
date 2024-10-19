@@ -1,7 +1,10 @@
+import client_server.client.Client;
 import client_server.server.Server;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        new Server();
+        Server server = new Server();
+        new Client(server);
+        new Client(server);        
     }
 }

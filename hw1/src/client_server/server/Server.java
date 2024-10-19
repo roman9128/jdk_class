@@ -5,6 +5,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -12,8 +14,8 @@ import java.time.format.DateTimeFormatter;
 public class Server extends JFrame {
 
     private static final int WINDOW_HEIGHT = 500;
-    private static final int WINDOW_WIDTH = 500;
-    private static final int WINDOW_POSX = 1000;
+    private static final int WINDOW_WIDTH = 400;
+    private static final int WINDOW_POSX = 800;
     private static final int WINDOW_POSY = 600;
 
     private FileWriter fileWriter;
@@ -28,9 +30,11 @@ public class Server extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocation(WINDOW_POSX, WINDOW_POSY);
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        setTitle("Test server");
+        setTitle("Server window");
         setResizable(true);
         isWorking = false;
+        textArea.setEditable(false);
+        stopServer.setEnabled(false);
 
         startServer.addActionListener(new ActionListener() {
             @Override
@@ -46,7 +50,7 @@ public class Server extends JFrame {
             }
         });
 
-        JPanel btnPanel = new JPanel(new GridLayout(1, 2));
+        JPanel btnPanel = new JPanel(new GridLayout(1, 3));
         btnPanel.add(startServer);
         btnPanel.add(stopServer);
         add(btnPanel, BorderLayout.SOUTH);
@@ -58,6 +62,8 @@ public class Server extends JFrame {
         JPanel statPanel = new JPanel(new GridLayout(1, 1));
         statPanel.setBackground(Color.LIGHT_GRAY);
         statPanel.add(currStatus);
+        currStatus.setText("Offline");
+        currStatus.setForeground(Color.RED);
         add(statPanel, BorderLayout.NORTH);
 
         setVisible(true);
@@ -67,38 +73,46 @@ public class Server extends JFrame {
     protected void start() {
         if (!isWorking) {
             isWorking = true;
-            textArea.append("Server is working now...\n");
+            String startMsg = System.lineSeparator()
+                    + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now())
+                    + " - server starts";
+            textArea.append(startMsg);
             currStatus.setText("Online");
             currStatus.setForeground(Color.GREEN);
 
             try {
                 fileWriter = new FileWriter("log.txt", true);
-                fileWriter.write(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now())
-                        + " - server starts" + System.lineSeparator());
+                fileWriter.write(startMsg);
             } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
-
+            startServer.setEnabled(false);
+            stopServer.setEnabled(true);
         } else {
-            textArea.append("Server is already working...\n");
+            textArea.append("\nServer is already working...");
         }
     }
 
     protected void stop() {
         if (isWorking) {
             isWorking = false;
-            textArea.append("Server stopped...\n");
+            String stopMsg = System.lineSeparator()
+                    + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now())
+                    + " - server stopped";
+            textArea.append(stopMsg);
             currStatus.setText("Offline");
             currStatus.setForeground(Color.RED);
             try {
-                fileWriter.write(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now())
-                        + " - server stopped" + System.lineSeparator());
+                fileWriter.write(stopMsg);
                 fileWriter.close();
             } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
+
+            startServer.setEnabled(true);
+            stopServer.setEnabled(false);
         } else {
-            textArea.append("Server is not working\n");
+            textArea.append("\nServer is not working");
         }
     }
 
@@ -113,4 +127,28 @@ public class Server extends JFrame {
         }
     }
 
+    public String sendText() {
+        return textArea.getText();
+    }
+
+    public String sendLog() {
+        if (isWorking) {
+            StringBuilder builder = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new FileReader("log.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line);
+                    builder.append(System.lineSeparator());
+                }
+                return builder.toString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+        return "";
+    }
+
+    public boolean isWorking() {
+        return isWorking;
+    }
 }
