@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -17,8 +16,6 @@ public class Server extends JFrame {
     private static final int WINDOW_WIDTH = 400;
     private static final int WINDOW_POSX = 800;
     private static final int WINDOW_POSY = 600;
-
-    private FileWriter fileWriter;
 
     private JButton startServer = new JButton("Start server");
     private JButton stopServer = new JButton("Stop server");
@@ -77,16 +74,11 @@ public class Server extends JFrame {
                     + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now())
                     + " - server starts";
             textArea.setText("");
+            textArea.append("Current session messages");
             textArea.append(startMsg);
+            writeToLog(startMsg);
             currStatus.setText("Online");
             currStatus.setForeground(Color.GREEN);
-
-            try {
-                fileWriter = new FileWriter("log.txt", true);
-                fileWriter.write(startMsg);
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-            }
             startServer.setEnabled(false);
             stopServer.setEnabled(true);
         } else {
@@ -103,12 +95,7 @@ public class Server extends JFrame {
             textArea.append(stopMsg);
             currStatus.setText("Offline");
             currStatus.setForeground(Color.RED);
-            try {
-                fileWriter.write(stopMsg);
-                fileWriter.close();
-            } catch (IOException e) {
-                textArea.append(e.getMessage());
-            }
+            writeToLog(stopMsg);
             startServer.setEnabled(true);
             stopServer.setEnabled(false);
         } else {
@@ -119,16 +106,20 @@ public class Server extends JFrame {
     public void takeMsg(String message) {
         if (isWorking) {
             textArea.append(message);
-            try {
-                fileWriter.write(message);
-            } catch (IOException e) {
-                textArea.append(e.getMessage());
-            }
+            writeToLog(message);
         }
     }
 
     public String sendText() {
         return textArea.getText();
+    }
+
+    public void writeToLog(String text) {
+        try (FileWriter fileWriter = new FileWriter("log.txt", true)) {
+            fileWriter.write(text);
+        } catch (Exception e) {
+            textArea.append(e.getMessage());
+        }
     }
 
     public String sendLog() {
@@ -140,7 +131,6 @@ public class Server extends JFrame {
                     builder.append(line);
                     builder.append(System.lineSeparator());
                 }
-                builder.append("___previous logs___\n");
                 return builder.toString();
             } catch (Exception e) {
                 textArea.append(e.getMessage());

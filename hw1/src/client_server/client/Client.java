@@ -171,6 +171,5 @@ public class Client extends JFrame {
     private void updateTextField() {
         textArea.setText("");
         textArea.append(server.sendLog());
-        textArea.append(server.sendText());
     }
 }
