@@ -50,7 +50,7 @@ public class Server extends JFrame {
             }
         });
 
-        JPanel btnPanel = new JPanel(new GridLayout(1, 3));
+        JPanel btnPanel = new JPanel(new GridLayout(1, 2));
         btnPanel.add(startServer);
         btnPanel.add(stopServer);
         add(btnPanel, BorderLayout.SOUTH);
@@ -76,6 +76,7 @@ public class Server extends JFrame {
             String startMsg = System.lineSeparator()
                     + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now())
                     + " - server starts";
+            textArea.setText("");
             textArea.append(startMsg);
             currStatus.setText("Online");
             currStatus.setForeground(Color.GREEN);
@@ -106,9 +107,8 @@ public class Server extends JFrame {
                 fileWriter.write(stopMsg);
                 fileWriter.close();
             } catch (IOException e) {
-                System.out.println(e.getMessage());
+                textArea.append(e.getMessage());
             }
-
             startServer.setEnabled(true);
             stopServer.setEnabled(false);
         } else {
@@ -116,7 +116,7 @@ public class Server extends JFrame {
         }
     }
 
-    public void getMsg(String message) {
+    public void takeMsg(String message) {
         if (isWorking) {
             textArea.append(message);
             try {
@@ -140,9 +140,10 @@ public class Server extends JFrame {
                     builder.append(line);
                     builder.append(System.lineSeparator());
                 }
+                builder.append("___previous logs___\n");
                 return builder.toString();
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                textArea.append(e.getMessage());
             }
         }
         return "";
@@ -150,5 +151,10 @@ public class Server extends JFrame {
 
     public boolean isWorking() {
         return isWorking;
+    }
+
+    public boolean checkPassword(char[] pass) {
+        String okPass = "pass";
+        return okPass.equals(String.valueOf(pass));
     }
 }

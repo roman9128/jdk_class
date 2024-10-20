@@ -84,17 +84,19 @@ public class Client extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (server.isWorking() && !isConnected) {
-                    isConnected = true;
-                    String cnctdMsg = System.lineSeparator()
-                            + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now())
-                            + " - " + login.getText() + " connected";
-                    textArea.append("\n--- previous logs -->");
-                    textArea.append(System.lineSeparator());
-                    textArea.append(server.sendLog());
-                    textArea.append("\n<-- previous logs ---");
-                    textArea.append(System.lineSeparator());
-                    textArea.append(cnctdMsg);
-                    server.getMsg(cnctdMsg);
+                    if (server.checkPassword(password.getPassword())) {
+                        isConnected = true;
+                        String cnctdMsg = System.lineSeparator()
+                                + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now())
+                                + " - " + login.getText() + " connected";
+                        textArea.append(System.lineSeparator());
+                        textArea.append(server.sendLog());
+                        textArea.append(cnctdMsg);
+                        server.takeMsg(cnctdMsg);
+                    } else {
+                        textArea.append("\nwrong password");
+                    }
+
                 } else if (!server.isWorking()) {
                     textArea.append("\nserver is offline, try later");
                 } else if (isConnected) {
@@ -158,10 +160,9 @@ public class Client extends JFrame {
 
     private void sendMsg() {
         if (server.isWorking() && isConnected) {
-            String msg = System.lineSeparator()
+            server.takeMsg(System.lineSeparator()
                     + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now())
-                    + " - " + login.getText() + " wrote: " + msgArea.getText();
-            server.getMsg(msg);
+                    + " - " + login.getText() + " wrote: " + msgArea.getText());
             msgArea.setText("");
             updateTextField();
         }
@@ -169,6 +170,7 @@ public class Client extends JFrame {
 
     private void updateTextField() {
         textArea.setText("");
+        textArea.append(server.sendLog());
         textArea.append(server.sendText());
     }
 }
