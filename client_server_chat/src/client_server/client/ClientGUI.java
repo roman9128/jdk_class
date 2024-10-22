@@ -4,24 +4,21 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
-import client_server.server.Server;
+public class ClientGUI extends JFrame implements ClientView {
 
-public class Client extends JFrame {
+    private ClientLogic clientLogic;
 
     private static final int WINDOW_HEIGHT = 400;
     private static final int WINDOW_WIDTH = 500;
     private static final int WINDOW_POSX = 900;
     private static final int WINDOW_POSY = 300;
-    private Server server;
 
-    private JTextField login = new JTextField("your login");
+    private JTextField login = new JTextField("login");
     private JPasswordField password = new JPasswordField("password");
     private JTextField ip = new JTextField("ip");
     private JTextField port = new JTextField("port");
-    private JButton btnLogin = new JButton("login");
+    private JButton btnLogin = new JButton("log in");
     private JButton btnStatus = new JButton("check server");
 
     private JTextArea textArea = new JTextArea();
@@ -29,14 +26,12 @@ public class Client extends JFrame {
 
     private JTextArea msgArea = new JTextArea();
     private JButton btnSend = new JButton("Send");
-    private JButton btnUpdate = new JButton("Update");
 
-    private boolean isConnected;
+    public ClientGUI(ClientLogic clientLogic) {
 
-    public Client(Server server) {
-        this.server = server;
+        this.clientLogic = clientLogic;
 
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
         setLocation(WINDOW_POSX, WINDOW_POSY);
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         setTitle("Client window");
@@ -51,9 +46,8 @@ public class Client extends JFrame {
 
         textArea.setEditable(false);
         textArea.setAutoscrolls(true);
-        msgArea.setPreferredSize(new Dimension(300, 25));
+        msgArea.setPreferredSize(new Dimension(400, 25));
         btnSend.setPreferredSize(new Dimension(70, 25));
-        btnUpdate.setPreferredSize(new Dimension(100, 25));
 
         TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "history");
         title.setTitleJustification(TitledBorder.RIGHT);
@@ -76,32 +70,13 @@ public class Client extends JFrame {
         JPanel msgPanel = new JPanel(new FlowLayout());
         msgPanel.add(msgArea);
         msgPanel.add(btnSend);
-        msgPanel.add(btnUpdate);
         add(msgPanel, BorderLayout.SOUTH);
 
         btnLogin.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (server.isWorking() && !isConnected) {
-                    if (server.checkPassword(password.getPassword())) {
-                        isConnected = true;
-                        String cnctdMsg = System.lineSeparator()
-                                + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now())
-                                + " - " + login.getText() + " connected";
-                        textArea.append(System.lineSeparator());
-                        textArea.append(server.sendLog());
-                        textArea.append(cnctdMsg);
-                        server.takeMsg(cnctdMsg);
-                    } else {
-                        textArea.append("\nwrong password");
-                    }
-
-                } else if (!server.isWorking()) {
-                    textArea.append("\nserver is offline, try later");
-                } else if (isConnected) {
-                    textArea.append("\nYou are already logged in");
-                }
+                clientLogic.loginLogout();
             }
         });
 
@@ -109,11 +84,7 @@ public class Client extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (server.isWorking()) {
-                    textArea.append("\nserver is online, connection is possible");
-                } else {
-                    textArea.append("\nserver is offline, try later");
-                }
+                clientLogic.checkServer();
             }
 
         });
@@ -123,16 +94,6 @@ public class Client extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 sendMsg();
-            }
-        });
-
-        btnUpdate.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (server.isWorking() && isConnected) {
-                    updateTextField();
-                }
             }
         });
 
@@ -158,18 +119,52 @@ public class Client extends JFrame {
         });
     }
 
-    private void sendMsg() {
-        if (server.isWorking() && isConnected) {
-            server.takeMsg(System.lineSeparator()
-                    + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now())
-                    + " - " + login.getText() + " wrote: " + msgArea.getText());
-            msgArea.setText("");
-            updateTextField();
-        }
+    @Override
+    public String getLogin() {
+        return login.getText();
     }
 
-    private void updateTextField() {
-        textArea.setText("");
-        textArea.append(server.sendLog());
+    @Override
+    public String getPassword() {
+        return String.valueOf(password.getPassword());
     }
+
+    @Override
+    public void sendMsg() {
+        clientLogic.sendMsg(msgArea.getText());
+    }
+
+    @Override
+    public void messageSent() {
+        msgArea.setText("");
+    }
+
+    @Override
+    public void receiveMsg(String log) {
+        textArea.setText("");
+        textArea.append(log);
+    }
+
+    @Override
+    public void userConnected(String loginMsg) {
+        textArea.setText("");
+        showText(loginMsg);
+        btnLogin.setText("log out");
+    }
+
+    @Override
+    public void userDisconnected(String logoutMsg) {
+        showText(logoutMsg);
+        btnLogin.setText("log in");
+    }
+
+    @Override
+    public void showText(String text) {
+        textArea.append(text);
+    }
+
+    public void setClientLogic(ClientLogic clientLogic) {
+        this.clientLogic = clientLogic;
+    }
+
 }

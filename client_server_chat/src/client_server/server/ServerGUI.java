@@ -1,16 +1,21 @@
 package client_server.server;
 
 import javax.swing.*;
+
+import client_server.repository.LogMaster;
+import client_server.client.ClientGUI;
+import client_server.client.ClientLogic;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileWriter;
-import java.io.FileReader;
-import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
-public class Server extends JFrame {
+public class ServerGUI extends JFrame implements ServerView {
 
     private static final int WINDOW_HEIGHT = 500;
     private static final int WINDOW_WIDTH = 400;
@@ -22,13 +27,17 @@ public class Server extends JFrame {
     private JTextArea textArea = new JTextArea();
     private JLabel currStatus = new JLabel();
     private boolean isWorking;
+    private LogMaster logger;
+    private ArrayList<ClientLogic> connectedUsers;
 
-    public Server() {
+    public ServerGUI() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocation(WINDOW_POSX, WINDOW_POSY);
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         setTitle("Server window");
         setResizable(true);
+        logger = new LogMaster();
+        connectedUsers = new ArrayList<>();
         isWorking = false;
         textArea.setEditable(false);
         stopServer.setEnabled(false);
@@ -103,6 +112,20 @@ public class Server extends JFrame {
         }
     }
 
+    public void addNewUser(ClientLogic client) {
+        connectedUsers.add(client);
+    }
+
+    public void removeUser(ClientLogic client) {
+        connectedUsers.remove(client);
+    }
+
+    public void sendNewTextToEveryone() {
+        for (ClientLogic client : connectedUsers) {
+            client.receiveMsg(sendLog());
+        }
+    }
+
     public void takeMsg(String message) {
         if (isWorking) {
             textArea.append(message);
@@ -110,29 +133,21 @@ public class Server extends JFrame {
         }
     }
 
-    public String sendText() {
-        return textArea.getText();
-    }
-
     public void writeToLog(String text) {
-        try (FileWriter fileWriter = new FileWriter("log.txt", true)) {
-            fileWriter.write(text);
-        } catch (Exception e) {
+        try {
+            logger.writeToLog(text);
+        } catch (IOException e) {
             textArea.append(e.getMessage());
         }
     }
 
     public String sendLog() {
         if (isWorking) {
-            StringBuilder builder = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new FileReader("log.txt"))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    builder.append(line);
-                    builder.append(System.lineSeparator());
-                }
-                return builder.toString();
-            } catch (Exception e) {
+            try {
+                return logger.sendLog();
+            } catch (FileNotFoundException e) {
+                textArea.append(e.getMessage());
+            } catch (IOException e) {
                 textArea.append(e.getMessage());
             }
         }
@@ -143,8 +158,8 @@ public class Server extends JFrame {
         return isWorking;
     }
 
-    public boolean checkPassword(char[] pass) {
+    public boolean checkPassword(String pass) {
         String okPass = "pass";
-        return okPass.equals(String.valueOf(pass));
+        return okPass.equals(pass);
     }
 }
