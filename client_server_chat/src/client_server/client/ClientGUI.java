@@ -7,7 +7,7 @@ import java.awt.event.*;
 
 public class ClientGUI extends JFrame implements ClientView {
 
-    private ClientLogic clientLogic;
+    private Connectable connectable;
 
     private static final int WINDOW_HEIGHT = 400;
     private static final int WINDOW_WIDTH = 500;
@@ -29,7 +29,7 @@ public class ClientGUI extends JFrame implements ClientView {
 
     public ClientGUI(Connectable connectable) {
 
-        this.clientLogic = (ClientLogic) connectable;
+        this.connectable = connectable;
 
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         setLocation(WINDOW_POSX, WINDOW_POSY);
@@ -76,7 +76,7 @@ public class ClientGUI extends JFrame implements ClientView {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                clientLogic.login();
+                connectable.login();
             }
         });
 
@@ -84,7 +84,7 @@ public class ClientGUI extends JFrame implements ClientView {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                clientLogic.checkServer();
+                connectable.checkServer();
             }
 
         });
@@ -131,7 +131,7 @@ public class ClientGUI extends JFrame implements ClientView {
 
     @Override
     public void sendMsg() {
-        clientLogic.sendMsg(msgArea.getText());
+        connectable.sendMsg(msgArea.getText());
     }
 
     @Override

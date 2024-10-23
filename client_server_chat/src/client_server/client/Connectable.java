@@ -12,4 +12,8 @@ public interface Connectable {
 
     void setServer(ServerLogic server);
 
+    void checkServer();
+
+    void sendMsg(String text);
+
 }

@@ -63,6 +63,7 @@ public class ClientLogic implements Connectable {
         view.userDisconnected();
     }
 
+    @Override
     public void sendMsg(String message) {
         if (server.isWorking() && isConnected) {
             server.takeMsg(System.lineSeparator()
@@ -70,7 +71,7 @@ public class ClientLogic implements Connectable {
                     + " - " + view.getLogin() + " wrote: " + message);
 
             view.messageSent();
-            server.sendNewTextToEveryone(server.sendLog());
+            server.sendNewTextToEveryone(message);
         }
     }
 
@@ -79,6 +80,7 @@ public class ClientLogic implements Connectable {
         view.receiveMsg(message);
     }
 
+    @Override
     public void checkServer() {
         if (server.isWorking()) {
             view.receiveMsg("\nserver is online, connection is possible");
