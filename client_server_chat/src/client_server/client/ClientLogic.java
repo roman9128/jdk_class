@@ -3,22 +3,29 @@ package client_server.client;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import client_server.server.ServerGUI;
 import client_server.server.ServerLogic;
 
-public class ClientLogic {
+public class ClientLogic implements Connectable {
 
     private boolean isConnected;
-    // private ServerLogic server;
-    private ServerGUI server;
+    private ServerLogic server;
     private ClientView view;
 
-    public ClientLogic(ServerGUI server) {
-        this.view = new ClientGUI(this);
+    public ClientLogic() {
+    }
+
+    @Override
+    public void setView(ClientView view) {
+        this.view = view;
+    }
+
+    @Override
+    public void setServer(ServerLogic server) {
         this.server = server;
     }
 
-    public void loginLogout() {
+    @Override
+    public void login() {
 
         if (server.isWorking() && !isConnected) {
             if (server.checkPassword(view.getPassword())) {
@@ -37,10 +44,10 @@ public class ClientLogic {
                 view.userConnected(builder.toString());
 
             } else {
-                view.showText("\nwrong password");
+                view.receiveMsg("\nwrong password");
             }
-        } else if (!server.isWorking()) {
-            view.showText("\nserver is offline, try later");
+        } else if (!server.isWorking() && !isConnected) {
+            view.receiveMsg("\nserver is offline, try later");
         } else if (isConnected) {
             logout();
         }
@@ -53,7 +60,7 @@ public class ClientLogic {
         isConnected = false;
         server.takeMsg(logoutMsg);
         server.removeUser(this);
-        view.userDisconnected(logoutMsg);
+        view.userDisconnected();
     }
 
     public void sendMsg(String message) {
@@ -63,20 +70,20 @@ public class ClientLogic {
                     + " - " + view.getLogin() + " wrote: " + message);
 
             view.messageSent();
-            server.sendNewTextToEveryone();
+            server.sendNewTextToEveryone(server.sendLog());
         }
     }
 
+    @Override
     public void receiveMsg(String message) {
         view.receiveMsg(message);
     }
 
     public void checkServer() {
         if (server.isWorking()) {
-            view.showText("\nserver is online, connection is possible");
+            view.receiveMsg("\nserver is online, connection is possible");
         } else {
-            view.showText("\nserver is offline, try later");
+            view.receiveMsg("\nserver is offline, try later");
         }
     }
-
 }

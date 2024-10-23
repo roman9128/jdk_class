@@ -27,9 +27,9 @@ public class ClientGUI extends JFrame implements ClientView {
     private JTextArea msgArea = new JTextArea();
     private JButton btnSend = new JButton("Send");
 
-    public ClientGUI(ClientLogic clientLogic) {
+    public ClientGUI(Connectable connectable) {
 
-        this.clientLogic = clientLogic;
+        this.clientLogic = (ClientLogic) connectable;
 
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         setLocation(WINDOW_POSX, WINDOW_POSY);
@@ -76,7 +76,7 @@ public class ClientGUI extends JFrame implements ClientView {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                clientLogic.loginLogout();
+                clientLogic.login();
             }
         });
 
@@ -140,31 +140,19 @@ public class ClientGUI extends JFrame implements ClientView {
     }
 
     @Override
-    public void receiveMsg(String log) {
-        textArea.setText("");
-        textArea.append(log);
+    public void receiveMsg(String msg) {
+        textArea.append(msg);
     }
 
     @Override
     public void userConnected(String loginMsg) {
         textArea.setText("");
-        showText(loginMsg);
+        receiveMsg(loginMsg);
         btnLogin.setText("log out");
     }
 
     @Override
-    public void userDisconnected(String logoutMsg) {
-        showText(logoutMsg);
+    public void userDisconnected() {
         btnLogin.setText("log in");
     }
-
-    @Override
-    public void showText(String text) {
-        textArea.append(text);
-    }
-
-    public void setClientLogic(ClientLogic clientLogic) {
-        this.clientLogic = clientLogic;
-    }
-
 }

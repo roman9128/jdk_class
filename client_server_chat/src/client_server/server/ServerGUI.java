@@ -2,20 +2,13 @@ package client_server.server;
 
 import javax.swing.*;
 
-import client_server.repository.LogMaster;
-import client_server.client.ClientGUI;
-import client_server.client.ClientLogic;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 
 public class ServerGUI extends JFrame implements ServerView {
+
+    private ServerLogic serverLogic;
 
     private static final int WINDOW_HEIGHT = 500;
     private static final int WINDOW_WIDTH = 400;
@@ -26,33 +19,31 @@ public class ServerGUI extends JFrame implements ServerView {
     private JButton stopServer = new JButton("Stop server");
     private JTextArea textArea = new JTextArea();
     private JLabel currStatus = new JLabel();
-    private boolean isWorking;
-    private LogMaster logger;
-    private ArrayList<ClientLogic> connectedUsers;
 
-    public ServerGUI() {
+    public ServerGUI(ServerLogic serverLogic) {
+
+        this.serverLogic = serverLogic;
+
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocation(WINDOW_POSX, WINDOW_POSY);
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         setTitle("Server window");
         setResizable(true);
-        logger = new LogMaster();
-        connectedUsers = new ArrayList<>();
-        isWorking = false;
+        setVisible(true);
         textArea.setEditable(false);
         stopServer.setEnabled(false);
 
         startServer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                start();
+                serverLogic.start();
             }
         });
 
         stopServer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                stop();
+                serverLogic.stop();
             }
         });
 
@@ -72,94 +63,30 @@ public class ServerGUI extends JFrame implements ServerView {
         currStatus.setForeground(Color.RED);
         add(statPanel, BorderLayout.NORTH);
 
-        setVisible(true);
-
     }
 
-    protected void start() {
-        if (!isWorking) {
-            isWorking = true;
-            String startMsg = System.lineSeparator()
-                    + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now())
-                    + " - server starts";
-            textArea.setText("");
-            textArea.append("Current session messages");
-            textArea.append(startMsg);
-            writeToLog(startMsg);
-            currStatus.setText("Online");
-            currStatus.setForeground(Color.GREEN);
-            startServer.setEnabled(false);
-            stopServer.setEnabled(true);
-        } else {
-            textArea.append("\nServer is already working...");
-        }
+    @Override
+    public void start(String startMsg) {
+        textArea.setText("");
+        textArea.append("Current session messages");
+        textArea.append(startMsg);
+        currStatus.setText("Online");
+        currStatus.setForeground(Color.GREEN);
+        startServer.setEnabled(false);
+        stopServer.setEnabled(true);
     }
 
-    protected void stop() {
-        if (isWorking) {
-            isWorking = false;
-            String stopMsg = System.lineSeparator()
-                    + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now())
-                    + " - server stopped";
-            textArea.append(stopMsg);
-            currStatus.setText("Offline");
-            currStatus.setForeground(Color.RED);
-            writeToLog(stopMsg);
-            startServer.setEnabled(true);
-            stopServer.setEnabled(false);
-        } else {
-            textArea.append("\nServer is not working");
-        }
+    @Override
+    public void stop(String stopMsg) {
+        textArea.append(stopMsg);
+        currStatus.setText("Offline");
+        currStatus.setForeground(Color.RED);
+        startServer.setEnabled(true);
+        stopServer.setEnabled(false);
     }
 
-    public void addNewUser(ClientLogic client) {
-        connectedUsers.add(client);
-    }
-
-    public void removeUser(ClientLogic client) {
-        connectedUsers.remove(client);
-    }
-
-    public void sendNewTextToEveryone() {
-        for (ClientLogic client : connectedUsers) {
-            client.receiveMsg(sendLog());
-        }
-    }
-
-    public void takeMsg(String message) {
-        if (isWorking) {
-            textArea.append(message);
-            writeToLog(message);
-        }
-    }
-
-    public void writeToLog(String text) {
-        try {
-            logger.writeToLog(text);
-        } catch (IOException e) {
-            textArea.append(e.getMessage());
-        }
-    }
-
-    public String sendLog() {
-        if (isWorking) {
-            try {
-                return logger.sendLog();
-            } catch (FileNotFoundException e) {
-                textArea.append(e.getMessage());
-            } catch (IOException e) {
-                textArea.append(e.getMessage());
-            }
-        }
-        return "";
-    }
-
-    public boolean isWorking() {
-        return isWorking;
-    }
-
-    public boolean checkPassword(String pass) {
-        String okPass = "pass";
-        return okPass.equals(pass);
+    @Override
+    public void showText(String text) {
+        textArea.append(text);
     }
 }

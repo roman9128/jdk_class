@@ -14,8 +14,6 @@ public interface ClientView {
 
     void userConnected(String loginMsg);
 
-    void userDisconnected(String logoutMsg);
-
-    void showText(String string);
+    void userDisconnected();
 
 }
