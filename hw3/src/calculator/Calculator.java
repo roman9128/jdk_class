@@ -2,7 +2,7 @@ package calculator;
 
 public class Calculator {
 
-    Calculator() {
+    public Calculator() {
     }
 
     public static <T1 extends Number, T2 extends Number> double sum(T1 a, T2 b) {
