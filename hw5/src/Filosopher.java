@@ -25,14 +25,13 @@ public class Filosopher extends Thread {
         while (isHungry) {
             try {
                 Thread.sleep(new Random().nextInt(new Random().nextInt(100, 300)));
-                if (canEat) {
+                if (canEat && eatCount < MAX_EAT_COUNT) {
                     eat();
-                } else {
-                    System.out.println(this.name + " can't eat now");
+                } else if (!canEat && eatCount < MAX_EAT_COUNT) {
+                    System.out.println(this.name + " can't eat now because ate recently");
                     Thread.sleep(new Random().nextInt(new Random().nextInt(200, 300)));
                     canEat = true;
-                }
-                if (eatCount == MAX_EAT_COUNT) {
+                } else if (eatCount == MAX_EAT_COUNT) {
                     System.out.println(this.name + " is not hungry anymore & thinks");
                     isHungry = false;
                 }
@@ -43,24 +42,22 @@ public class Filosopher extends Thread {
     }
 
     private void eat() {
-        if (eatCount < MAX_EAT_COUNT) {
-            try {
-                if (leftFork.isOnTable() && rightFork.isOnTable()) {
-                    leftFork.setOnTable(false);
-                    rightFork.setOnTable(false);
-                    System.out.println(this.name + " took forks ## " + leftFork.getPosition() + " & " + rightFork.getPosition());
-                    Thread.sleep(new Random().nextInt(500, 1000));
-                    System.out.println(this.name + " ate " + (eatCount + 1) + " time");
-                    eatCount++;
-                    canEat = false;
-                    leftFork.setOnTable(true);
-                    rightFork.setOnTable(true);
-                    System.out.println(this.name + " put forks ## " + leftFork.getPosition() + " & " + rightFork.getPosition() + " on table and thinks");
-                    Thread.sleep(new Random().nextInt(400, 900));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+        try {
+            if (leftFork.isOnTable() && rightFork.isOnTable()) {
+                leftFork.setOnTable(false);
+                rightFork.setOnTable(false);
+                System.out.println(this.name + " took forks ## " + leftFork.getPosition() + " & " + rightFork.getPosition());
+                Thread.sleep(new Random().nextInt(500, 1000));
+                System.out.println(this.name + " ate " + (eatCount + 1) + " time");
+                eatCount++;
+                canEat = false;
+                leftFork.setOnTable(true);
+                rightFork.setOnTable(true);
+                System.out.println(this.name + " put forks ## " + leftFork.getPosition() + " & " + rightFork.getPosition() + " on table and thinks");
+                Thread.sleep(new Random().nextInt(400, 900));
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
