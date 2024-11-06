@@ -10,13 +10,15 @@ public class Fork {
         this.position = ++forkCount;
     }
 
-    public boolean isOnTable() {
+    public synchronized boolean isOnTable() {
         return isOnTable;
     }
 
     public void setOnTable(boolean isOnTable) {
         synchronized (this) {
-            this.isOnTable = isOnTable;
+            if (this.isOnTable != isOnTable) {
+                this.isOnTable = isOnTable;
+            }
         }
     }
 
