@@ -14,12 +14,16 @@ public class Fork {
         return isOnTable;
     }
 
-    public void setOnTable(boolean isOnTable) {
-        synchronized (this) {
-            if (this.isOnTable != isOnTable) {
-                this.isOnTable = isOnTable;
-            }
+    public void putForkOnTable() {
+        this.isOnTable = true;
+    }
+
+    public synchronized boolean takeForkIfItsPossible() {
+        if (this.isOnTable) {
+            this.isOnTable = false;
+            return true;
         }
+        return false;
     }
 
     public int getPosition() {

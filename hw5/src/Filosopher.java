@@ -43,18 +43,21 @@ public class Filosopher extends Thread {
 
     private void eat() {
         try {
-            if (leftFork.isOnTable() && rightFork.isOnTable()) {
-                leftFork.setOnTable(false);
-                rightFork.setOnTable(false);
-                System.out.println(this.name + " took forks ## " + leftFork.getPosition() + " & " + rightFork.getPosition());
-                Thread.sleep(new Random().nextInt(500, 1000));
-                System.out.println(this.name + " ate " + (eatCount + 1) + " time");
-                eatCount++;
-                canEat = false;
-                leftFork.setOnTable(true);
-                rightFork.setOnTable(true);
-                System.out.println(this.name + " put forks ## " + leftFork.getPosition() + " & " + rightFork.getPosition() + " on table and thinks");
-                Thread.sleep(new Random().nextInt(400, 900));
+            if (rightFork.takeForkIfItsPossible()) {
+                if (leftFork.takeForkIfItsPossible()) {
+                    System.out.println(this.name + " took forks ## " + leftFork.getPosition() + " & " + rightFork.getPosition());
+                    Thread.sleep(new Random().nextInt(500, 1000));
+                    System.out.println(this.name + " ate " + (eatCount + 1) + " time");
+                    eatCount++;
+                    canEat = false;
+                    System.out.println(this.name + " put forks ## " + leftFork.getPosition() + " & " + rightFork.getPosition() + " on table and thinks");
+                    rightFork.putForkOnTable();
+                    leftFork.putForkOnTable();
+                    Thread.sleep(new Random().nextInt(400, 900));
+                } else {
+                    rightFork.putForkOnTable();
+                    Thread.sleep(this.hashCode() % 1000);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
