@@ -1,4 +1,4 @@
-
+package rt;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -15,13 +15,12 @@ public class Game {
 
     public Game() {
         random = new Random();
-        resultsAfterChoiceChange = new HashMap<>();
         resultsWithoutChoiceChange = new HashMap<>();
+        resultsAfterChoiceChange = new HashMap<>();
         winCountWithoutChoiceChange = 0;
         winCountAfterChoiceChange = 0;
         start();
-        calculateResults();
-        printResults();
+        showResults();
     }
 
     private void start() {
@@ -41,41 +40,28 @@ public class Game {
                     secondChoice = j;
                 }
             }
-
             // 1 ситуация. Выбор остался прежним
             if (winnerChoice == firstChoice) {
-                resultsWithoutChoiceChange.put(i, true); // истина - победа
+                resultsWithoutChoiceChange.put(i + 1, true); // истина - победа
+                winCountWithoutChoiceChange++;
             } else {
-                resultsWithoutChoiceChange.put(i, false); // ложь - поражение
+                resultsWithoutChoiceChange.put(i + 1, false); // ложь - поражение
             }
             // 2 ситуация. Дверь изменена.
             if (winnerChoice == secondChoice) {
-                resultsAfterChoiceChange.put(i, true);
-            } else {
-                resultsAfterChoiceChange.put(i, false);
-            }
-        }
-    }
-
-    private void calculateResults() {
-        // 1 ситуация
-        for (HashMap.Entry<Integer, Boolean> entry : resultsWithoutChoiceChange.entrySet()) {
-            if (entry.getValue().equals(true)) {
-                winCountWithoutChoiceChange++;
-            }
-        }
-        // 2 ситуация
-        for (HashMap.Entry<Integer, Boolean> entry : resultsAfterChoiceChange.entrySet()) {
-            if (entry.getValue().equals(true)) {
+                resultsAfterChoiceChange.put(i + 1, true);
                 winCountAfterChoiceChange++;
+            } else {
+                resultsAfterChoiceChange.put(i + 1, false);
             }
         }
     }
 
-    private void printResults() {
+    private void showResults() {
+        System.out.println("Games played in total: " + GAMES_AMOUNT);
         System.out.printf("Win without choice change: %.2f", (winCountWithoutChoiceChange.doubleValue() / GAMES_AMOUNT.doubleValue() * 100d));
-        System.out.println(" %");
+        System.out.println(" % (" + winCountWithoutChoiceChange + " wins & " + (GAMES_AMOUNT - winCountWithoutChoiceChange) + " fails)");
         System.out.printf("Win after choice change: %.2f", (winCountAfterChoiceChange.doubleValue() / GAMES_AMOUNT.doubleValue() * 100d));
-        System.out.println(" %");
+        System.out.println(" % (" + winCountAfterChoiceChange + " wins & " + (GAMES_AMOUNT - winCountAfterChoiceChange) + " fails)");
     }
 }

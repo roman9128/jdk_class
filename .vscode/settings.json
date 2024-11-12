@@ -1,7 +1,9 @@
 {
     "java.project.sourcePaths": [
+        "hw6/test/src/main/java/rt",
         "hw5/src",
         "client_server_chat/src",
-        "hw6/test/src/main/java/rt"
-    ]
+        "hw6/src/main/java/rt"
+    ],
+    "java.compile.nullAnalysis.mode": "automatic"
 }
