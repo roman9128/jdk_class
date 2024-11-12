@@ -1,4 +1,7 @@
 {
-    "java.configuration.updateBuildConfiguration": "automatic",
-    "maven.view": "hierarchical"
+    "java.project.sourcePaths": [
+        "hw5/src",
+        "client_server_chat/src",
+        "hw6/test/src/main/java/rt"
+    ]
 }
