@@ -21,7 +21,7 @@ public class Game {
         winCountAfterChoiceChange = 0;
         start();
         calculateResults();
-        printResult();
+        printResults();
     }
 
     private void start() {
@@ -29,7 +29,7 @@ public class Game {
         for (int i = 0; i < GAMES_AMOUNT; i++) {
             int winnerChoice = random.nextInt(1, DOORS_COUNT + 1); // дверь, за которой находится приз
             int firstChoice = random.nextInt(1, DOORS_COUNT + 1); // дверь, которую выбрали изначально
-            int doorOpenedAfterFirstChoice = 0; // дверь, которую открыт Монти
+            int doorOpenedAfterFirstChoice = 0; // дверь, которую открыл Монти
             for (int j = 1; j < DOORS_COUNT + 1; j++) {
                 if (j != winnerChoice && j != firstChoice) {
                     doorOpenedAfterFirstChoice = j;
@@ -72,7 +72,7 @@ public class Game {
         }
     }
 
-    private void printResult() {
+    private void printResults() {
         System.out.printf("Win without choice change: %.2f", (winCountWithoutChoiceChange.doubleValue() / GAMES_AMOUNT.doubleValue() * 100d));
         System.out.println(" %");
         System.out.printf("Win after choice change: %.2f", (winCountAfterChoiceChange.doubleValue() / GAMES_AMOUNT.doubleValue() * 100d));
